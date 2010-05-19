@@ -46,6 +46,15 @@ module Delayed
 
         self.send("before_#{name}_post_process", :"halt_processing_for_#{name}")
 
+        define_method "#{name}_crop!" do
+          Delayed::Job.enqueue DelayedCropJob.new(self.class.name, read_attribute(:id), name.to_sym,crop_x ,crop_y ,crop_w ,crop_h )
+        end
+
+        define_method "cropping?" do
+          !crop_x.blank? && !crop_y.blank? && !crop_w.blank? && !crop_h.blank?
+        end
+
+        attr_accessor :crop_x ,:crop_y ,:crop_w ,:crop_h 
         before_save :"#{name}_processing!"
         after_save  :"enqueue_job_for_#{name}"
       end
